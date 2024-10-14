@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Digital Clock with Alarm</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .clock-container {
+            text-align: center;
+        }
+
+        .clock {
+            font-size: 4rem;
+            background-color: #20232a;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .date {
+            font-size: 1.5rem;
+        }
+
+        .theme-toggle, .alarm-set-btn {
+            background-color: #282c34;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Light theme styles */
+        .light-theme {
+            background-color: #f4f4f9;
+            color: #20232a;
+        }
+
+        .light-theme .theme-toggle {
+            background-color: #ddd;
+            color: #20232a;
+        }
+
+        .alarm-input {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+
+        .alarm-list {
+            margin-top: 20px;
+        }
+
+        .alarm-item {
+            background-color: #282c34;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        .alarm-item .countdown {
+            font-size: 0.9rem;
+            color: #f4f4f9;
+        }
+
+        .alarm-item .delete-alarm {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clock-container">
+        <div class="clock" id="clock"></div>
+        <div class="date" id="date"></div>
+
+        <input type="time" id="alarmTime" class="alarm-input">
+        <button class="alarm-set-btn" id="setAlarmBtn">Set Alarm</button>
+        <p id="alarmMessage"></p>
+        
+        <div class="alarm-list" id="alarmList"></div>
+        
+        <button class="theme-toggle" id="themeToggle">Switch to Light Theme</button>
+
+        <!-- Alarm Sound -->
+        <audio id="alarmSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+    </div>
+
+    <script>
+        let alarms = [];
+
+        // Update the clock and date
+        function updateClock() {
+            const clockElement = document.getElementById('clock');
+            const dateElement = document.getElementById('date');
+            const currentTime = new Date();
+
+            let hours = currentTime.getHours();
+            let minutes = currentTime.getMinutes();
+            let seconds = currentTime.getSeconds();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 12-hour format for midnight/noon
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+            clockElement.textContent = timeString;
+
+            // Date formatting
+            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const day = daysOfWeek[currentTime.getDay()];
+            const date = currentTime.getDate();
+            const month = months[currentTime.getMonth()];
+            const year = currentTime.getFullYear();
+
+            const dateString = `${day}, ${month} ${date}, ${year}`;
+            dateElement.textContent = dateString;
+
+            // Check alarms
+            checkAlarms();
+        }
+
+        // Set a new alarm
+        function setAlarm() {
+            const alarmInput = document.getElementById('alarmTime');
+            const alarmTime = alarmInput.value;
+            if (alarmTime) {
+                const alarm = {
+                    time: alarmTime,
+                    id: Date.now(),
+                    countdown: calculateCountdown(alarmTime)
+                };
+                alarms.push(alarm);
+                displayAlarms();
+                alarmInput.value = '';  // Clear input field
+            }
+        }
+
+        // Calculate countdown to alarm time
+        function calculateCountdown(alarmTime) {
+            const [alarmHours, alarmMinutes] = alarmTime.split(':');
+            const currentTime = new Date();
+            const alarmDate = new Date();
+            alarmDate.setHours(alarmHours);
+            alarmDate.setMinutes(alarmMinutes);
+            alarmDate.setSeconds(0);
+
+            const timeDiff = alarmDate - currentTime;
+            if (timeDiff <= 0) {
+                return 'Alarm time already passed';
+            }
+
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m remaining`;
+        }
+
+        // Display the alarms
+        function displayAlarms() {
+            const alarmList = document.getElementById('alarmList');
+            alarmList.innerHTML = '';  // Clear previous list
+
+            alarms.forEach((alarm) => {
+                const alarmItem = document.createElement('div');
+                alarmItem.classList.add('alarm-item');
+                alarmItem.innerHTML = `
+                    <span>${alarm.time}</span>
+                    <span class="countdown">${alarm.countdown}</span>
+                    <button class="delete-alarm" data-id="${alarm.id}">Delete</button>
+                `;
+                alarmList.appendChild(alarmItem);
+            });
+        }
+
+        // Delete alarm
+        function deleteAlarm(id) {
+            alarms = alarms.filter(alarm => alarm.id !== id);
+            displayAlarms();
+        }
+
+        // Check if the current time matches any alarm
+        function checkAlarms() {
+            const currentTime = new Date();
+            const currentHours = currentTime.getHours();
+            const currentMinutes = currentTime.getMinutes();
+            const formattedCurrentTime = `${(currentHours < 10 ? '0' : '') + currentHours}:${(currentMinutes < 10 ? '0' : '') + currentMinutes}`;
+
+            alarms.forEach((alarm, index) => {
+                if (formattedCurrentTime === alarm.time) {
+                    playAlarm();
+                    deleteAlarm(alarm.id);  // Remove alarm once it rings
+                }
+            });
+        }
+
+        // Play alarm sound
+        function playAlarm() {
+            const alarmSound = document.getElementById('alarmSound');
+            alarmSound.play();
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggleBtn = document.getElementById('themeToggle');
+            body.classList.toggle('light-theme');
+            if (body.classList.contains('light-theme')) {
+                themeToggleBtn.textContent = 'Switch to Dark Theme';
+            } else {
+                themeToggleBtn.textContent = 'Switch to Light Theme';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('setAlarmBtn').addEventListener('click', setAlarm);
+        document.getElementById('alarmList').addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-alarm')) {
+                const alarmId = Number(e.target.dataset.id);
+                deleteAlarm(alarmId);
+            }
+        });
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call to display time immediately
+    </script>
+
+</body>
+</html>
