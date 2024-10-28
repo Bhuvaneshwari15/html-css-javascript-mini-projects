@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List CRUD with Popup</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+li .actions {
+    display: flex;
+    gap: 10px;
+}
+
+li .actions button {
+    padding: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+li .actions button:hover {
+    background-color: #0056b3;
+}
+
+li .delete {
+    background-color: #dc3545;
+}
+
+li .delete:hover {
+    background-color: #c82333;
+}
+
+/* Popup Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 300px;
+    text-align: center;
+    position: relative;
+}
+
+.popup-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.popup-content button {
+    width: 100%;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: red;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <button onclick="openPopup()">Add New Task</button>
+        <ul id="todoList"></ul>
+    </div>
+
+    <!-- Popup for Add/Edit -->
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2 id="popupTitle">Add Task</h2>
+            <input type="text" id="todoInput" placeholder="Enter a task" />
+            <button onclick="saveTodo()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        let todos = [];
+let currentIndex = null;
+
+function renderTodos() {
+    const todoList = document.getElementById('todoList');
+    todoList.innerHTML = '';
+
+    todos.forEach((todo, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <span>${todo}</span>
+            <div class="actions">
+                <button onclick="editTodo(${index})">Edit</button>
+                <button class="delete" onclick="deleteTodo(${index})">Delete</button>
+            </div>
+        `;
+        todoList.appendChild(listItem);
+    });
+}
+
+function openPopup(isEdit = false) {
+    const popup = document.getElementById('popup');
+    popup.style.display = 'flex';
+
+    if (isEdit) {
+        document.getElementById('popupTitle').innerText = 'Edit Task';
+    } else {
+        document.getElementById('popupTitle').innerText = 'Add Task';
+        document.getElementById('todoInput').value = '';
+    }
+}
+
+function closePopup() {
+    const popup = document.getElementById('popup');
+    popup.style.display = 'none';
+}
+
+function saveTodo() {
+    const todoInput = document.getElementById('todoInput');
+    const todoText = todoInput.value.trim();
+
+    if (todoText === '') {
+        alert('Please enter a task.');
+        return;
+    }
+
+    if (currentIndex === null) {
+        // Create new todo
+        todos.push(todoText);
+    } else {
+        // Update existing todo
+        todos[currentIndex] = todoText;
+        currentIndex = null;
+    }
+
+    todoInput.value = '';
+    closePopup();
+    renderTodos();
+}
+
+function editTodo(index) {
+    currentIndex = index;
+    document.getElementById('todoInput').value = todos[index];
+    openPopup(true);
+}
+
+function deleteTodo(index) {
+    todos.splice(index, 1);
+    renderTodos();
+}
+
+    </script>
+</body>
+</html>

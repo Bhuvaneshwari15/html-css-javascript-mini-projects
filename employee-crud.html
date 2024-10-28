@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Details CRUD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 90%;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        li .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        li .actions button {
+            padding: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        li .actions button:hover {
+            background-color: #0056b3;
+        }
+
+        li .delete {
+            background-color: #dc3545;
+        }
+
+        li .delete:hover {
+            background-color: #c82333;
+        }
+
+        /* Popup Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            position: relative;
+        }
+
+        .popup-content input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup-content button {
+            width: 100%;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: red;
+        }
+
+        .status-toggle {
+            background-color: #ffc107;
+        }
+
+        .status-toggle:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Details</h1>
+        <input type="text" id="search" placeholder="Search employee by name..." oninput="searchEmployee()" />
+        <button onclick="openPopup()">Add New Employee</button>
+        <select id="sortOptions" onchange="sortEmployees()">
+            <option value="name">Sort by Name</option>
+            <option value="position">Sort by Position</option>
+            <option value="department">Sort by Department</option>
+        </select>
+        <ul id="employeeList"></ul>
+    </div>
+
+    <!-- Popup for Add/Edit -->
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2 id="popupTitle">Add Employee</h2>
+            <input type="text" id="employeeName" placeholder="Employee Name" />
+            <input type="text" id="employeePosition" placeholder="Position" />
+            <input type="text" id="employeeDepartment" placeholder="Department" />
+            <button onclick="saveEmployee()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        let employees = JSON.parse(localStorage.getItem('employees')) || [];
+        let currentIndex = null;
+
+        function renderEmployees() {
+            const employeeList = document.getElementById('employeeList');
+            employeeList.innerHTML = '';
+
+            employees.forEach((employee, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${employee.name} - ${employee.position} (${employee.department}) - Status: ${employee.status}</span>
+                    <div class="actions">
+                        <button onclick="editEmployee(${index})">Edit</button>
+                        <button class="delete" onclick="confirmDeleteEmployee(${index})">Delete</button>
+                        <button class="status-toggle" onclick="toggleStatus(${index})">${employee.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
+                    </div>
+                `;
+                employeeList.appendChild(listItem);
+            });
+
+            localStorage.setItem('employees', JSON.stringify(employees));
+        }
+
+        function openPopup(isEdit = false) {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'flex';
+
+            if (isEdit) {
+                document.getElementById('popupTitle').innerText = 'Edit Employee';
+            } else {
+                document.getElementById('popupTitle').innerText = 'Add Employee';
+                clearPopupFields();
+            }
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        function saveEmployee() {
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const employeePosition = document.getElementById('employeePosition').value.trim();
+            const employeeDepartment = document.getElementById('employeeDepartment').value.trim();
+
+            if (employeeName === '' || employeePosition === '' || employeeDepartment === '') {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            const employee = {
+                name: employeeName,
+                position: employeePosition,
+                department: employeeDepartment,
+                status: 'Active'
+            };
+
+            if (currentIndex === null) {
+                employees.push(employee);
+            } else {
+                employees[currentIndex] = employee;
+                currentIndex = null;
+            }
+
+            clearPopupFields();
+            closePopup();
+            renderEmployees();
+        }
+
+        function clearPopupFields() {
+            document.getElementById('employeeName').value = '';
+            document.getElementById('employeePosition').value = '';
+            document.getElementById('employeeDepartment').value = '';
+        }
+
+        function editEmployee(index) {
+            currentIndex = index;
+            document.getElementById('employeeName').value = employees[index].name;
+            document.getElementById('employeePosition').value = employees[index].position;
+            document.getElementById('employeeDepartment').value = employees[index].department;
+            openPopup(true);
+        }
+
+        function confirmDeleteEmployee(index) {
+            const isConfirmed = confirm("Are you sure you want to delete this employee?");
+            if (isConfirmed) {
+                deleteEmployee(index);
+            }
+        }
+
+        function deleteEmployee(index) {
+            employees.splice(index, 1);
+            renderEmployees();
+        }
+
+        function toggleStatus(index) {
+            employees[index].status = employees[index].status === 'Active' ? 'Inactive' : 'Active';
+            renderEmployees();
+        }
+
+        function searchEmployee() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filteredEmployees = employees.filter(employee => employee.name.toLowerCase().includes(query));
+            const employeeList = document.getElementById('employeeList');
+            employeeList.innerHTML = '';
+
+            filteredEmployees.forEach((employee, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${employee.name} - ${employee.position} (${employee.department}) - Status: ${employee.status}</span>
+                    <div class="actions">
+                        <button onclick="editEmployee(${index})">Edit</button>
+                        <button class="delete" onclick="confirmDeleteEmployee(${index})">Delete</button>
+                        <button class="status-toggle" onclick="toggleStatus(${index})">${employee.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
+                    </div>
+                `;
+                employeeList.appendChild(listItem);
+            });
+        }
+
+        function sortEmployees() {
+            const sortOption = document.getElementById('sortOptions').value;
+            employees.sort((a, b) => a[sortOption].localeCompare(b[sortOption]));
+            renderEmployees();
+        }
+
+        window.onload = renderEmployees;
+    </script>
+</body>
+</html>

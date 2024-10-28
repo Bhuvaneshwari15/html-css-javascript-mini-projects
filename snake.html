@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        canvas {
+            background-color: #333;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+
+        function gameLoop() {
+            moveSnake();
+            if (checkGameOver()) {
+                alert("Game Over! Your score: " + score);
+                resetGame();
+            } else {
+                if (snakeEatsFood()) {
+                    score++;
+                    food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+                    growSnake();
+                }
+                drawGame();
+            }
+            setTimeout(gameLoop, 100);
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+            snake.pop();
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw snake
+            snake.forEach(part => {
+                ctx.fillStyle = "lime";
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+            });
+
+            // Draw food
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function snakeEatsFood() {
+            return snake[0].x === food.x && snake[0].y === food.y;
+        }
+
+        function growSnake() {
+            const tail = snake[snake.length - 1];
+            snake.push(tail); // Just add the last tail part again
+        }
+
+        function checkGameOver() {
+            // Check if snake hits wall
+            if (snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount) {
+                return true;
+            }
+            // Check if snake hits itself
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            dx = 0;
+            dy = 0;
+            score = 0;
+        }
+
+        window.addEventListener("keydown", function (e) {
+            switch (e.key) {
+                case "ArrowUp":
+                    if (dy === 0) { dx = 0; dy = -1; }
+                    break;
+                case "ArrowDown":
+                    if (dy === 0) { dx = 0; dy = 1; }
+                    break;
+                case "ArrowLeft":
+                    if (dx === 0) { dx = -1; dy = 0; }
+                    break;
+                case "ArrowRight":
+                    if (dx === 0) { dx = 1; dy = 0; }
+                    break;
+            }
+        });
+
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>

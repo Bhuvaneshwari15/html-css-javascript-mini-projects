@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image as Radio Button</title>
+  <style>
+    /* Hide the actual radio buttons */
+    input[type="radio"] {
+      display: none; /* This hides the radio buttons */
+    }
+
+    /* Style the images acting as radio buttons */
+    .image-radio {
+      cursor: pointer;
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      border: 2px solid transparent; /* Default border */
+      transition: border 0.3s;
+    }
+
+    /* Selected state */
+    .selected {
+      border: 2px solid blue;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Select an Option</h2>
+
+  <!-- Radio buttons (hidden) -->
+  <input type="radio" id="radio1" name="choice" value="option1">
+  <input type="radio" id="radio2" name="choice" value="option2">
+  <input type="radio" id="radio3" name="choice" value="option3">
+
+  <!-- Images acting as radio buttons -->
+  <img src="https://via.placeholder.com/100" id="img1" class="image-radio" alt="Option 1" data-radio="radio1">
+  <img src="https://via.placeholder.com/100" id="img2" class="image-radio" alt="Option 2" data-radio="radio2">
+  <img src="https://via.placeholder.com/100" id="img3" class="image-radio" alt="Option 3" data-radio="radio3">
+
+  <script>
+    // Get all images and radio buttons
+    const images = document.querySelectorAll('.image-radio');
+
+    // Function to handle image click
+    images.forEach((image) => {
+      image.addEventListener('click', () => {
+        // Get the radio button associated with the clicked image
+        const radioId = image.getAttribute('data-radio');
+        const radioButton = document.getElementById(radioId);
+
+        // Check if the clicked image is already selected
+        if (radioButton.checked) {
+          // If it is, uncheck the radio button and deselect the image
+          radioButton.checked = false;
+          image.classList.remove('selected'); // Remove highlight
+          image.src = 'https://via.placeholder.com/100'; // Reset image
+        } else {
+          // Otherwise, select the radio button and highlight the image
+          radioButton.checked = true;
+          images.forEach((img) => {
+            img.classList.remove('selected'); // Remove highlight from all images
+            img.src = 'https://via.placeholder.com/100'; // Reset other images
+          });
+          image.classList.add('selected'); // Highlight the selected image
+          image.src = 'https://via.placeholder.com/100/0000FF/FFFFFF?text=Selected'; // Change image to indicate selection
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

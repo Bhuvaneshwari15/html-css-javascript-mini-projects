@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click the Box Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #gameArea {
+            width: 100vw;
+            height: 80vh;
+            background-color: #f0f0f0;
+            position: relative;
+            margin: 0 auto;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        #box {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Click the Box!</h1>
+    <p>Score: <span id="score">0</span></p>
+    <div id="gameArea">
+        <div id="box"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        const box = document.getElementById("box");
+        const scoreDisplay = document.getElementById("score");
+        const gameArea = document.getElementById("gameArea");
+
+        function getRandomPosition() {
+            const x = Math.random() * (gameArea.offsetWidth - box.offsetWidth);
+            const y = Math.random() * (gameArea.offsetHeight - box.offsetHeight);
+            return { x, y };
+        }
+
+        function moveBox() {
+            const { x, y } = getRandomPosition();
+            box.style.left = `${x}px`;
+            box.style.top = `${y}px`;
+        }
+
+        box.addEventListener("click", function () {
+            score++;
+            scoreDisplay.textContent = score;
+            moveBox();
+        });
+
+        window.addEventListener("load", function () {
+            moveBox();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page with Sidebar, Header, Footer, and Overflow Table</title>
+  <style>
+    /* General reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Layout */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header, footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+
+    /* Container to hold sidebar and main content */
+    .content-wrapper {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Sidebar navigation (left) */
+    aside {
+      flex: 1;
+      background-color: #ddd;
+      padding: 20px;
+      text-align: center;
+    }
+
+    aside nav a {
+      display: block;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #555;
+      color: white;
+      text-decoration: none;
+    }
+
+    aside nav a:hover {
+      background-color: #333;
+    }
+
+    /* Main content area */
+    main {
+      flex: 3;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    /* Table container */
+    .table-container {
+      width: 100%;
+      overflow-x: auto; /* Enable horizontal scroll if table overflows */
+      margin-top: 20px;
+      scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+
+    /* Hide scrollbar for WebKit browsers */
+    .table-container::-webkit-scrollbar {
+      display: none; /* Safari and Chrome */
+    }
+
+    /* Style for the table */
+    table {
+      width: auto; /* Table adapts to its content */
+      border-collapse: collapse;
+    }
+
+    /* Style for table cells */
+    th, td {
+      padding: 10px;
+      border: 1px solid black;
+      text-align: left;
+    }
+
+    /* Style for the table header */
+    th {
+      background-color: #f2f2f2;
+    }
+
+    /* Footer style */
+    footer {
+      margin-top: auto;
+    }
+
+    /* Optional media query to adjust layout on small screens */
+    @media (max-width: 768px) {
+      .content-wrapper {
+        flex-direction: column;
+      }
+
+      aside {
+        flex: none;
+        width: 100%;
+      }
+
+      main {
+        flex: none;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>My Website</h1>
+</header>
+
+<div class="content-wrapper">
+  <!-- Sidebar (left) -->
+  <aside>
+    <h3>Navigation</h3>
+    <nav>
+      <a href="#">Link 1</a>
+      <a href="#">Link 2</a>
+      <a href="#">Link 3</a>
+      <a href="#">Link 4</a>
+    </nav>
+  </aside>
+
+  <!-- Main content area -->
+  <main>
+    <h2>Main Content</h2>
+    <p>This is the main content section with a paragraph. Below is the table that scrolls horizontally if necessary without a visible scrollbar.</p>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Column 1</th>
+            <th>Column 2</th>
+            <th>Column 3</th>
+            <th>Column 4</th>
+            <th>Column 5</th>
+            <th>Column 6</th>
+            <th>Column 7</th>
+            <th>Column 8</th>
+            <th>Column 9</th>
+            <th>Column 10</th>
+            <th>Column 11</th>
+            <th>Column 12</th>
+            <th>Column 13</th>
+            <th>Column 14</th>
+            <th>Column 15</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Row 1, Col 1</td>
+            <td>Row 1, Col 2</td>
+            <td>Row 1, Col 3</td>
+            <td>Row 1, Col 4</td>
+            <td>Row 1, Col 5</td>
+            <td>Row 1, Col 6</td>
+            <td>Row 1, Col 7</td>
+            <td>Row 1, Col 8</td>
+            <td>Row 1, Col 9</td>
+            <td>Row 1, Col 10</td>
+            <td>Row 1, Col 11</td>
+            <td>Row 1, Col 12</td>
+            <td>Row 1, Col 13</td>
+            <td>Row 1, Col 14</td>
+            <td>Row 1, Col 15</td>
+          </tr>
+          <tr>
+            <td>Row 2, Col 1</td>
+            <td>Row 2, Col 2</td>
+            <td>Row 2, Col 3</td>
+            <td>Row 2, Col 4</td>
+            <td>Row 2, Col 5</td>
+            <td>Row 2, Col 6</td>
+            <td>Row 2, Col 7</td>
+            <td>Row 2, Col 8</td>
+            <td>Row 2, Col 9</td>
+            <td>Row 2, Col 10</td>
+            <td>Row 2, Col 11</td>
+            <td>Row 2, Col 12</td>
+            <td>Row 2, Col 13</td>
+            <td>Row 2, Col 14</td>
+            <td>Row 2, Col 15</td>
+          </tr>
+          <!-- Add more rows as needed -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>Footer Content</p>
+</footer>
+
+</body>
+</html>

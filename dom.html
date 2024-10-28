@@ -1,0 +1,89 @@
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Button Triggering</title>
+</head>
+<body>
+  <div id="myDiv">
+    <p>This is a paragraph.
+    <button id="button1">Button 1</button>
+    <button id="button2">Button 2</button>
+    </p>
+  </div>    
+
+  <script>
+    const myDiv = document.getElementById('myDiv');
+    const button1 = document.getElementById('button1');
+    const button2 = document.getElementById('button2');
+
+    button1.addEventListener('click', () => {
+      myDiv.style.backgroundColor = 'yellow';
+      button1.style.backgroundColor = 'blue';
+      button2.style.backgroundColor = 'white';
+    });
+
+    button2.addEventListener('click', () => {
+      myDiv.style.backgroundColor = 'green';
+      button1.style.backgroundColor = 'white';
+      button2.style.backgroundColor = 'red';
+    });
+  </script>
+</body>
+</html>
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Propagation Example</title>
+    <style>
+        .container{
+            border: 2px solid rgb(23, 172, 165);
+            background-color:rgb(23, 172, 165);
+            display: inline-block;
+        }
+        #para{
+            border: 2px solid #15abe6;
+            display: inline-block;
+            background-color: #15abe6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <p id="para">
+        <button id="button1">Button 1</button>
+        <button id="button2">Button 2</button>
+    </p>
+</div>
+<script>
+    const container=document.querySelector('.container');
+    const paragraph=document.querySelector('#para');
+    container.addEventListener('click', () => {
+        console.log('Div is clicked');
+    })
+    paragraph.addEventListener('click', () => {
+        console.log('Paragraph is clicked');
+        event.stopPropagation();
+    })
+    document.getElementById('button1').addEventListener('click', (event) => {
+        console.log('Button 1 is clicked');
+        container.click(); 
+        event.stopPropagation();
+    })
+    document.getElementById('button2').addEventListener('click', (event) => {
+        console.log('Button 2 is clicked');
+        paragraph.click();
+        event.stopPropagation();
+    })
+</script>
+
+</body>
+</html>
+
+
+
