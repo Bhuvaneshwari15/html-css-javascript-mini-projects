@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .converter-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .converter-container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .input-section, .result-section {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .convert-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .convert-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .result-section {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="converter-container">
+    <h1>Currency Converter</h1>
+    <div class="input-section">
+        <input type="number" id="amount" placeholder="Enter amount" min="1" required>
+        <select id="fromCurrency">
+            <!-- Options will be dynamically populated -->
+        </select>
+        to
+        <select id="toCurrency">
+            <!-- Options will be dynamically populated -->
+        </select>
+    </div>
+    <button class="convert-btn" id="convertBtn">Convert</button>
+
+    <div class="loading" id="loading">Fetching conversion rate...</div>
+
+    <div class="result-section" id="result"></div>
+    <div class="error" id="error"></div>
+</div>
+
+<script>
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    const amountInput = document.getElementById('amount');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultDisplay = document.getElementById('result');
+    const loading = document.getElementById('loading');
+    const errorDisplay = document.getElementById('error');
+
+    const apiKey = 'YOUR_API_KEY';  // Replace this with your actual API key from ExchangeRate-API
+    const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/`;
+
+    async function fetchCurrencies() {
+        try {
+            const response = await fetch(`${apiUrl}USD`);
+            const data = await response.json();
+            const currencyCodes = Object.keys(data.conversion_rates);
+
+            currencyCodes.forEach(currency => {
+                const optionFrom = document.createElement('option');
+                const optionTo = document.createElement('option');
+                optionFrom.value = currency;
+                optionFrom.text = currency;
+                optionTo.value = currency;
+                optionTo.text = currency;
+                fromCurrency.appendChild(optionFrom);
+                toCurrency.appendChild(optionTo);
+            });
+
+            // Set default selections
+            fromCurrency.value = 'USD';
+            toCurrency.value = 'EUR';
+        } catch (error) {
+            errorDisplay.textContent = 'Error fetching currency data. Please try again later.';
+        }
+    }
+
+    async function convertCurrency() {
+        const amount = amountInput.value;
+        const from = fromCurrency.value;
+        const to = toCurrency.value;
+
+        if (!amount || amount <= 0) {
+            errorDisplay.textContent = 'Please enter a valid amount.';
+            return;
+        }
+
+        loading.style.display = 'block';
+        resultDisplay.textContent = '';
+        errorDisplay.textContent = '';
+
+        try {
+            const response = await fetch(`${apiUrl}${from}`);
+            const data = await response.json();
+            const rate = data.conversion_rates[to];
+            const result = (amount * rate).toFixed(2);
+
+            resultDisplay.textContent = `${amount} ${from} = ${result} ${to}`;
+        } catch (error) {
+            errorDisplay.textContent = 'Error fetching conversion rate. Please try again.';
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    // Initialize currency options on page load
+    window.onload = fetchCurrencies;
+
+    // Add event listener for the convert button
+    convertBtn.addEventListener('click', convertCurrency);
+</script>
+
+</body>
+</html>

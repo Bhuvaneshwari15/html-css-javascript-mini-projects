@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Progress Bar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 30px;
+            width: 0;
+            background-color: #4caf50;
+            border-radius: 20px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input {
+            padding: 8px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar-container">
+        <div id="progressBar1" class="progress-bar">0%</div>
+    </div>
+    <div id="progressText1" class="progress-text">Progress: 0%</div>
+    
+    <div class="progress-bar-container">
+        <div id="progressBar2" class="progress-bar">0%</div>
+    </div>
+    <div id="progressText2" class="progress-text">Progress: 0%</div>
+
+    <input type="number" id="customDuration" placeholder="Enter duration in milliseconds (e.g., 5000)">
+    <button id="startButton">Start Progress</button>
+    <button id="pauseButton">Pause Progress</button>
+    <button id="resumeButton">Resume Progress</button>
+</div>
+
+<script>
+    const progressBar1 = document.getElementById('progressBar1');
+    const progressBar2 = document.getElementById('progressBar2');
+    const progressText1 = document.getElementById('progressText1');
+    const progressText2 = document.getElementById('progressText2');
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const resumeButton = document.getElementById('resumeButton');
+    const customDurationInput = document.getElementById('customDuration');
+    
+    let progress1 = 0, progress2 = 0;
+    let interval1, interval2;
+    let isPaused = false;
+    let duration = 50; // default interval in ms
+
+    startButton.addEventListener('click', () => {
+        let customDuration = parseInt(customDurationInput.value);
+        duration = customDuration ? customDuration / 100 : 50;
+        
+        if (!isPaused) {
+            progress1 = 0;
+            progress2 = 0;
+            progressBar1.style.width = '0%';
+            progressBar1.textContent = '0%';
+            progressText1.textContent = 'Progress: 0%';
+            progressBar2.style.width = '0%';
+            progressBar2.textContent = '0%';
+            progressText2.textContent = 'Progress: 0%';
+        }
+        
+        startProgress();
+    });
+
+    pauseButton.addEventListener('click', () => {
+        clearInterval(interval1);
+        clearInterval(interval2);
+        isPaused = true;
+    });
+
+    resumeButton.addEventListener('click', () => {
+        if (isPaused) {
+            startProgress();
+            isPaused = false;
+        }
+    });
+
+    function startProgress() {
+        interval1 = setInterval(() => {
+            if (progress1 >= 100) clearInterval(interval1);
+            else progress1 += 1;
+            updateProgressBar(progressBar1, progressText1, progress1);
+        }, duration);
+
+        interval2 = setInterval(() => {
+            if (progress2 >= 100) clearInterval(interval2);
+            else progress2 += 2;
+            updateProgressBar(progressBar2, progressText2, progress2);
+        }, duration * 2); // Progress bar 2 progresses slower
+    }
+
+    function updateProgressBar(bar, text, progress) {
+        bar.style.width = `${progress}%`;
+        bar.textContent = `${progress}%`;
+        text.textContent = `Progress: ${progress}%`;
+    }
+</script>
+
+</body>
+</html>

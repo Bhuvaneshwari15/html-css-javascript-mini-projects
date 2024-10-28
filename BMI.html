@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced BMI Calculator</title>
+    <style>
+        /* Basic styles for the app */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .bmi-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 320px;
+            text-align: center;
+        }
+
+        input[type="number"], select {
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 80%;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .result, .recommendation, .error {
+            margin-top: 20px;
+        }
+
+        .recommendation {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bmi-container">
+        <h2>Enhanced BMI Calculator</h2>
+        <select id="unitSelect">
+            <option value="metric">Metric (kg, m)</option>
+            <option value="imperial">Imperial (lbs, in)</option>
+        </select>
+        <input type="number" id="weightInput" placeholder="Weight" />
+        <input type="number" id="heightInput" placeholder="Height" />
+        <input type="number" id="ageInput" placeholder="Age (years)" />
+        <select id="genderSelect">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+        <input type="number" id="goalInput" placeholder="Target Weight (kg)" />
+        <button class="button" id="calculateButton">Calculate BMI</button>
+        <div class="result" id="result"></div>
+        <div class="recommendation" id="recommendation"></div>
+        <div class="error" id="error"></div>
+        <canvas id="bmiChart" width="400" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('bmiChart').getContext('2d');
+        const bmiChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Time labels will be added here
+                datasets: [{
+                    label: 'BMI Over Time',
+                    data: [], // BMI data points will be added here
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        document.getElementById('calculateButton').addEventListener('click', calculateBMI);
+
+        function calculateBMI() {
+            const unit = document.getElementById('unitSelect').value;
+            const weight = parseFloat(document.getElementById('weightInput').value);
+            const height = parseFloat(document.getElementById('heightInput').value);
+            const age = parseInt(document.getElementById('ageInput').value);
+            const gender = document.getElementById('genderSelect').value;
+            const resultDiv = document.getElementById('result');
+            const recommendationDiv = document.getElementById('recommendation');
+            const errorDiv = document.getElementById('error');
+
+            // Clear previous results
+            resultDiv.innerHTML = '';
+            recommendationDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0 || isNaN(age) || age <= 0) {
+                errorDiv.innerHTML = 'Please enter valid weight, height, and age.';
+                return;
+            }
+
+            let bmi;
+            if (unit === 'metric') {
+                bmi = (weight / (height * height)).toFixed(2);
+            } else { // imperial
+                bmi = ((weight / (height * height)) * 703).toFixed(2);
+            }
+            resultDiv.innerHTML = `Your BMI: ${bmi}`;
+
+            // Health recommendations based on BMI
+            let recommendation;
+            if (bmi < 18.5) {
+                recommendation = 'You are underweight. Consider a balanced diet and consult a healthcare provider.';
+            } else if (bmi >= 18.5 && bmi < 24.9) {
+                recommendation = 'You have a normal weight. Keep up the good work!';
+            } else if (bmi >= 25 && bmi < 29.9) {
+                recommendation = 'You are overweight. Consider a healthy diet and exercise.';
+            } else {
+                recommendation = 'You are obese. It’s important to seek guidance from a healthcare provider.';
+            }
+
+            recommendationDiv.innerHTML = recommendation;
+
+            // Update the chart with the new BMI value
+            const currentDate = new Date().toLocaleDateString();
+            bmiChart.data.labels.push(currentDate);
+            bmiChart.data.datasets[0].data.push(bmi);
+            bmiChart.update();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Countdown App</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            transition: background-color 0.3s;
+        }
+
+        .countdown {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            text-align: center;
+        }
+
+        .display {
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        .input-group input {
+            width: 50px;
+            padding: 5px;
+            margin-right: 5px;
+            text-align: center;
+        }
+
+        .button {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls {
+            margin-top: 10px;
+        }
+
+        .timer-list {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .timer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .theme-toggle {
+            margin-top: 20px;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="countdown">
+        <h2>Countdown Timer</h2>
+        <div class="display" id="display">00:00:00:00</div>
+        <div class="input-group">
+            <input type="number" id="days" placeholder="Days" min="0">
+            <input type="number" id="hours" placeholder="Hours" min="0" max="23">
+            <input type="number" id="minutes" placeholder="Minutes" min="0" max="59">
+            <input type="number" id="seconds" placeholder="Seconds" min="0" max="59">
+        </div>
+        <div class="controls">
+            <button class="button" id="startButton">Start</button>
+            <button class="button" id="pauseButton" disabled>Pause</button>
+            <button class="button" id="resetButton">Reset</button>
+        </div>
+        <div class="timer-list" id="timerList"></div>
+        <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <audio id="alarmSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+    <script>
+        let countdownInterval;
+        let totalTime;
+        let remainingTime;
+        let isPaused = false;
+        let theme = 'light';
+        let timers = [];
+
+        function startCountdown() {
+            const days = parseInt(document.getElementById('days').value) || 0;
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+
+            totalTime = (days * 86400) + (hours * 3600) + (minutes * 60) + seconds;
+            remainingTime = totalTime;
+
+            if (totalTime > 0) {
+                clearInterval(countdownInterval);
+                countdownInterval = setInterval(updateDisplay, 1000);
+                document.getElementById('pauseButton').disabled = false;
+                document.getElementById('startButton').disabled = true;
+
+                // Save timer
+                timers.push({ remainingTime, timerId: Date.now() });
+                saveTimers();
+                displayTimers();
+            }
+        }
+
+        function updateDisplay() {
+            if (remainingTime <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('display').innerText = "Time's up!";
+                document.getElementById('alarmSound').play();
+                return;
+            }
+
+            remainingTime--;
+            const days = Math.floor(remainingTime / 86400);
+            const hours = Math.floor((remainingTime % 86400) / 3600);
+            const minutes = Math.floor((remainingTime % 3600) / 60);
+            const seconds = remainingTime % 60;
+
+            document.getElementById('display').innerText = 
+                `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function pauseCountdown() {
+            if (isPaused) {
+                countdownInterval = setInterval(updateDisplay, 1000);
+                document.getElementById('pauseButton').innerText = 'Pause';
+            } else {
+                clearInterval(countdownInterval);
+                document.getElementById('pauseButton').innerText = 'Resume';
+            }
+            isPaused = !isPaused;
+        }
+
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            document.getElementById('display').innerText = "00:00:00:00";
+            document.getElementById('days').value = '';
+            document.getElementById('hours').value = '';
+            document.getElementById('minutes').value = '';
+            document.getElementById('seconds').value = '';
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('startButton').disabled = false;
+            isPaused = false;
+            remainingTime = 0;
+        }
+
+        function saveTimers() {
+            localStorage.setItem('timers', JSON.stringify(timers));
+        }
+
+        function loadTimers() {
+            const savedTimers = JSON.parse(localStorage.getItem('timers')) || [];
+            timers = savedTimers;
+            displayTimers();
+        }
+
+        function displayTimers() {
+            const timerList = document.getElementById('timerList');
+            timerList.innerHTML = '';
+            timers.forEach(timer => {
+                const timerItem = document.createElement('div');
+                timerItem.classList.add('timer-item');
+                const timeDisplay = formatTime(timer.remainingTime);
+                timerItem.innerHTML = `<span>${timeDisplay}</span>
+                <button class="button" onclick="deleteTimer(${timer.timerId})">Delete</button>`;
+                timerList.appendChild(timerItem);
+            });
+        }
+
+        function formatTime(remaining) {
+            const days = Math.floor(remaining / 86400);
+            const hours = Math.floor((remaining % 86400) / 3600);
+            const minutes = Math.floor((remaining % 3600) / 60);
+            const seconds = remaining % 60;
+            return `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function deleteTimer(timerId) {
+            timers = timers.filter(timer => timer.timerId !== timerId);
+            saveTimers();
+            displayTimers();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const countdown = document.querySelector('.countdown');
+
+            if (theme === 'light') {
+                body.style.backgroundColor = '#333';
+                countdown.style.backgroundColor = '#444';
+                body.style.color = '#fff';
+                theme = 'dark';
+            } else {
+                body.style.backgroundColor = '#f4f4f9';
+                countdown.style.backgroundColor = '#fff';
+                body.style.color = '#000';
+                theme = 'light';
+            }
+        }
+
+        // Load timers when the app starts
+        loadTimers();
+        document.getElementById('startButton').addEventListener('click', startCountdown);
+        document.getElementById('pauseButton').addEventListener('click', pauseCountdown);
+        document.getElementById('resetButton').addEventListener('click', resetCountdown);
+    </script>
+
+</body>
+</html>

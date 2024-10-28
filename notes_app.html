@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Notes App with Extra Features</title>
+    <style>
+        /* Base styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #noteTitleInput, #noteInput, #categoryInput, #prioritySelect, #searchInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1.2em;
+        }
+
+        #addNoteButton, #toggleDarkMode {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        #addNoteButton:hover, #toggleDarkMode:hover {
+            background-color: #2980b9;
+        }
+
+        .note {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .note h3, .note p, .note-category, .note-priority {
+            margin: 5px 0;
+        }
+
+        .note button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .note button:hover {
+            background-color: #c0392b;
+        }
+
+        .dark-mode {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+
+        .dark-mode .note {
+            background-color: #444;
+            border-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Advanced Notes App</h1>
+
+<input type="text" id="searchInput" placeholder="Search notes..." onkeyup="filterNotes()">
+
+<!-- New note inputs -->
+<input type="text" id="noteTitleInput" placeholder="Title" />
+<textarea id="noteInput" rows="4" placeholder="Write your note here..."></textarea>
+<select id="prioritySelect">
+    <option value="Low">Low Priority</option>
+    <option value="Medium">Medium Priority</option>
+    <option value="High">High Priority</option>
+</select>
+<input type="text" id="categoryInput" placeholder="Category (e.g., Work, Personal)" />
+
+<button id="addNoteButton">Add Note</button>
+<button id="toggleDarkMode">Toggle Dark Mode</button>
+
+<div id="notesContainer"></div>
+
+<script>
+    // Elements
+    const addNoteButton = document.getElementById('addNoteButton');
+    const noteTitleInput = document.getElementById('noteTitleInput');
+    const noteInput = document.getElementById('noteInput');
+    const prioritySelect = document.getElementById('prioritySelect');
+    const categoryInput = document.getElementById('categoryInput');
+    const notesContainer = document.getElementById('notesContainer');
+    const searchInput = document.getElementById('searchInput');
+    const toggleDarkModeButton = document.getElementById('toggleDarkMode');
+
+    // Load notes from localStorage
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+
+    // Display notes and apply dark mode if enabled
+    displayNotes();
+    if (darkMode) toggleDarkMode();
+
+    // Add a new note
+    addNoteButton.addEventListener('click', () => {
+        const title = noteTitleInput.value.trim();
+        const content = noteInput.value.trim();
+        const priority = prioritySelect.value;
+        const category = categoryInput.value.trim();
+
+        if (content) {
+            const newNote = {
+                id: Date.now(),
+                title: title || 'Untitled',
+                content: content,
+                priority: priority,
+                category: category || 'Uncategorized'
+            };
+            notes.push(newNote);
+            saveNotes();
+            clearInputs();
+            displayNotes();
+        }
+    });
+
+    // Display notes
+    function displayNotes() {
+        notesContainer.innerHTML = '';
+        notes.forEach(note => {
+            const noteElement = document.createElement('div');
+            noteElement.classList.add('note');
+            noteElement.innerHTML = `
+                <h3>${note.title}</h3>
+                <p contenteditable="true" onblur="editNoteContent(${note.id}, this)">${note.content}</p>
+                <p class="note-category">Category: ${note.category}</p>
+                <p class="note-priority">Priority: ${note.priority}</p>
+                <button onclick="deleteNote(${note.id})">Delete</button>
+            `;
+            notesContainer.appendChild(noteElement);
+        });
+    }
+
+    // Save notes to localStorage
+    function saveNotes() {
+        localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    // Delete a note
+    function deleteNote(id) {
+        notes = notes.filter(note => note.id !== id);
+        saveNotes();
+        displayNotes();
+    }
+
+    // Edit a note's content
+    function editNoteContent(id, element) {
+        const updatedContent = element.textContent.trim();
+        const noteIndex = notes.findIndex(note => note.id === id);
+        if (noteIndex !== -1) {
+            notes[noteIndex].content = updatedContent;
+            saveNotes();
+        }
+    }
+
+    // Filter notes
+    function filterNotes() {
+        const searchText = searchInput.value.toLowerCase();
+        const filteredNotes = notes.filter(note => 
+            note.title.toLowerCase().includes(searchText) ||
+            note.content.toLowerCase().includes(searchText) ||
+            note.category.toLowerCase().includes(searchText) ||
+            note.priority.toLowerCase().includes(searchText)
+        );
+        notesContainer.innerHTML = '';
+        filteredNotes.forEach(note => {
+            const noteElement = document.createElement('div');
+            noteElement.classList.add('note');
+            noteElement.innerHTML = `
+                <h3>${note.title}</h3>
+                <p contenteditable="true" onblur="editNoteContent(${note.id}, this)">${note.content}</p>
+                <p class="note-category">Category: ${note.category}</p>
+                <p class="note-priority">Priority: ${note.priority}</p>
+                <button onclick="deleteNote(${note.id})">Delete</button>
+            `;
+            notesContainer.appendChild(noteElement);
+        });
+    }
+
+    // Clear input fields
+    function clearInputs() {
+        noteTitleInput.value = '';
+        noteInput.value = '';
+        prioritySelect.value = 'Low';
+        categoryInput.value = '';
+    }
+
+    // Dark mode toggle
+    toggleDarkModeButton.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        darkMode = !darkMode;
+        localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    });
+
+    // Toggle dark mode on load
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+</script>
+
+</body>
+</html>

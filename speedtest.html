@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Tester</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 60%;
+        }
+
+        #quote {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 1.2em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Typing Speed Tester</h2>
+        <div id="quote">Click Start to begin typing!</div>
+        <textarea id="textInput" disabled></textarea>
+        <button id="startButton">Start</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const quoteDisplay = document.getElementById('quote');
+        const textInput = document.getElementById('textInput');
+        const startButton = document.getElementById('startButton');
+        const resultDisplay = document.getElementById('result');
+
+        const quotes = [
+            "The quick brown fox jumps over the lazy dog.",
+            "JavaScript is a versatile programming language.",
+            "Coding challenges help improve problem-solving skills.",
+            "HTML, CSS, and JavaScript are the building blocks of the web.",
+            "Practice typing regularly to improve your typing speed."
+        ];
+
+        let startTime;
+        let currentQuote = '';
+
+        startButton.addEventListener('click', () => {
+            textInput.disabled = false;
+            textInput.value = '';
+            textInput.focus();
+            resultDisplay.textContent = '';
+
+            currentQuote = getRandomQuote();
+            quoteDisplay.textContent = currentQuote;
+
+            startTime = new Date().getTime();
+
+            startButton.disabled = true;
+
+            textInput.addEventListener('input', checkTyping);
+        });
+
+        function getRandomQuote() {
+            return quotes[Math.floor(Math.random() * quotes.length)];
+        }
+
+        function checkTyping() {
+            const typedText = textInput.value;
+
+            if (typedText === currentQuote) {
+                const endTime = new Date().getTime();
+                const timeTaken = (endTime - startTime) / 1000; // Time in seconds
+
+                const wordCount = currentQuote.split(' ').length;
+                const wordsPerMinute = Math.round((wordCount / timeTaken) * 60);
+
+                resultDisplay.textContent = `You typed at ${wordsPerMinute} words per minute!`;
+
+                startButton.disabled = false;
+                textInput.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

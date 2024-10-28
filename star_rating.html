@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Rating System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .rating-container {
+            text-align: center;
+        }
+
+        .stars {
+            display: inline-flex;
+            cursor: pointer;
+        }
+
+        .stars span {
+            font-size: 2rem;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+
+        .stars span:hover,
+        .stars span:hover ~ span {
+            color: gold;
+        }
+
+        .stars.selected span {
+            color: gold;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="rating-container">
+    <div class="stars" id="starRating">
+        <span data-value="5">&#9733;</span>
+        <span data-value="4">&#9733;</span>
+        <span data-value="3">&#9733;</span>
+        <span data-value="2">&#9733;</span>
+        <span data-value="1">&#9733;</span>
+    </div>
+    <div class="feedback" id="feedback">Rate this product</div>
+</div>
+
+<script>
+    const starRating = document.getElementById('starRating');
+    const feedback = document.getElementById('feedback');
+    let rating = 0;
+
+    starRating.addEventListener('click', (event) => {
+        if (event.target.tagName === 'SPAN') {
+            const selectedValue = parseInt(event.target.getAttribute('data-value'));
+            rating = selectedValue;
+            updateStars(rating);
+            updateFeedback(rating);
+        }
+    });
+
+    function updateStars(rating) {
+        const stars = starRating.children;
+        for (let i = 0; i < stars.length; i++) {
+            if (parseInt(stars[i].getAttribute('data-value')) <= rating) {
+                stars[i].style.color = 'gold';
+            } else {
+                stars[i].style.color = '#ccc';
+            }
+        }
+    }
+
+    function updateFeedback(rating) {
+        const feedbackMessages = {
+            1: "Terrible",
+            2: "Poor",
+            3: "Average",
+            4: "Good",
+            5: "Excellent"
+        };
+        feedback.textContent = `You rated: ${feedbackMessages[rating]}`;
+    }
+</script>
+
+</body>
+</html>
